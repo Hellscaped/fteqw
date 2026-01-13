@@ -86,7 +86,7 @@ PNGVER=1.6.40
 OGGVER=1.3.4
 VORBISVER=1.3.7
 VULKANVER=1.3.275.0
-SDL2VER=2.30.4
+SDL2VER=2.30.7
 SCINTILLAVER=373
 OPUSVER=1.3.1
 SPEEXVER=1.2.0
@@ -128,9 +128,7 @@ endif
 endif
 BRANDFLAGS+=-DCONFIG_FILE_NAME=config_$(FTE_CONFIG).h $(FTE_CONFIG_EXTRA)
 EXE_NAME=$(FTE_CONFIG)
-ifeq (,$(findstring DNO_SPEEX,$(FTE_CONFIG_EXTRA)))
-    USE_SPEEX?=1
-endif
+USE_SPEEX=0
 ifeq (,$(findstring DNO_OPUS,$(FTE_CONFIG_EXTRA)))
     USE_OPUS=1
 endif
@@ -1092,6 +1090,11 @@ ifeq (1,$(LINK_OPENSSL))
         ALL_DFLAGS+=$(shell $(PKGCONFIG) openssl --cflags --silence-errors)
         COMMONLDDEPS+=$(shell $(PKGCONFIG) openssl --libs --silence-errors)
     endif
+endif
+
+# bad hack -- make sure we build sspi if we're building windows sdl
+ifeq (win_SDL,$(findstring win,$(FTE_TARGET))$(findstring _SDL,$(FTE_TARGET)))
+	COMMON_OBJS += net_ssl_winsspi.o
 endif
 
 ifeq (1,$(shell $(PKGCONFIG) --exists gnutls && echo 1))
